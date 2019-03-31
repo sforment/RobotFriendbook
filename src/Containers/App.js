@@ -6,41 +6,35 @@ import Scroll from '../Components/Scroll'
 import ErrorBoundry from '../Components/ErrorBoundry'
 import './App.css'
 
-import { setSearchfield } from '../actions'
+import { setSearchfield, requestRobots } from '../actions'
 
 const mapStateToProps = state => {
 	return {
-		searchfield: state.searchfield
+		searchfield: state.searchRobots.searchfield,
+		robots: state.requestRobots.robots,
+		isPending: state.requestRobots.isPending,
+		error: state.requestRobots.error
 	}
 }
 
 const mapDispatchtoProps = (dispatch) => {
 	return {
-		onSearchChange: (event) => dispatch(setSearchfield(event.target.value))
+		onSearchChange: (event) => dispatch(setSearchfield(event.target.value)),
+		onRequestRobots: () => dispatch(requestRobots())
 	}
 }
 
 class App extends Component {
-	constructor() {
-		super()
-		this.state = {
-			robots: []
-		}
-	}
-
 	componentDidMount() {
-		fetch('https://jsonplaceholder.typicode.com/users')
-			.then(response => response.json())
-			.then(users => this.setState({ robots: users }));
+		this.props.onRequestRobots();
 	}
 
 	render() {	
-		const { robots } = this.state;
-		const { searchfield, onSearchChange } = this.props;
+		const { searchfield, onSearchChange, robots, isPending } = this.props;
 		const filteredRobots = robots.filter(robot => {
 			return robot.name.toLowerCase().includes(searchfield.toLowerCase());
 		})
-		return !robots.length ? 
+		return isPending ? 
 		<h1 className='tc'>Loading...</h1> :
 		(
 			<div className='tc'>
